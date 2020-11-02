@@ -1,46 +1,79 @@
-import json
-import datetime
-import time as ti
-#from AN import AN_con_estab_op, AN_data_exch
-from os import path
+from time import sleep
+import gNB
 
-#method to create a unique session for each call
-def session_maker():
-    calling_number = input("Please enter a 10 digit number you would like to call: ")
-    caller_id =  input('Please enter your user ID: ')
-    caller_id = int(caller_id)
-    # Returns unix timestamp for current time
-    timestamp = ti.time()
-    # Get datetime object in local time
-    d = datetime.datetime.fromtimestamp(timestamp)
-    # Return unix timestamp from datetime object
-    date = d.strftime("%d.%m.%y")
-    time = d.strftime("%H:%M:%S")
-    print(f"Caller with Session ID {caller_id} making call request")
-    #session data package for persistant storage of the session information
-    caller = {
-    f'caller: {caller_id}': {
-        'caller_id': caller_id,
-        'calling_number': calling_number,
-        'date': date,
-        'time': time
-     }
-    }
-    #data message to be sent after establishing the connection
-    payload = {
-        'CALLER_MESSAGE': 'Hello, How are you',
-    }
+def RRC_SENDER(message):
+    sleep(1)
+    print(f"UE: {message['msg_type']} is sent over {message['channel']} channel")
+    gNB.gNB_RECEIVER(message)
 
-    return caller, payload
+def RACH_SENDER(message):
+    sleep(1)
+    print('UE: Sending RACH preamble')
+    gNB.gNB_RECEIVER(message)
 
-#Method for the logical simulation of the UE's operation
-def UE_Operation():
-    call_option = 'yes' #Flag for making a call
-    while(call_option == 'yes' or call_option =='y'):
-        caller, payload = session_maker() # Making a unique session with phone number and unique caller ID
-        json_file = json.dumps(caller) # creating the JSON message payload
+def UL_SENDER(message):
+    if message['msg_type'] == 'RACH-PRACH':
+        RACH_SENDER(message)
+    elif message['msg_type'] == 'RRC Connection Request':
+        RRC_SENDER(message)
+
+def DL_RECEIVER(message):
+
+    if message['msg_type'] == 'PSS/SSS': # PSS/SSS signal recieved for synchronization with gNB
+        syn_flag = message['sync_signal']
+        if syn_flag == 1:
+            print(f"UE: {message['msg_type']} signal is recieved at UE and synchronization is done!!!!!!")
+            sleep(1)
+        return syn_flag
     
-        call_option = input('Do you wanna make another call? (yes/no): ')
+    elif message['msg_type'] == 'PBCH': #PBCH signal recieved to intiate System Information reception
+        if message['sys_info_trigger'] == 1:
+            print(f"UE: {message['msg_type']} signal is recieved at UE and System information reception process will begin")
+            sleep(1)       
+        return message['sys_info_trigger']
+    
+    elif message['msg_type'] == 'BCCH-BCH': # MIB is received and processed
+        print('UE: Master Information Block has been recieved through BCCH-BCH channel')
+        if message['SIB_DECODER_FLAG'] == True:
+            print('UE: The SIB decoder information from MIB has been recieved to decode SIB')
+            sleep(1)
+        return message['SIB_DECODER_FLAG']
+    
+    elif message['msg_type'] == 'BCCH-DL SCH': # SIB blocks are now recieved and processed
+        if message['SIB Type'] == 1:
+            print('UE: System Information Block Type 1 has been recieved through BCCH-DL SCH')
+            print("--------------System Information Block Type 1-------------")
+            print(message)
+            sleep(1)
+            sib1_flag = True
+            return sib1_flag
+            
+        elif message['SIB Type'] == 2:
+            print('UE: System Information Block Type 1 has been recieved through BCCH-DL SCH')
+            print("--------------System Information Block Type 2-------------")
+            print(message)
+            sleep(1)
+            print("-------------------STARTING RANDOM ACCESS PROCEURE--------------------")
+            payload = {
+                'msg_type':'RACH-PRACH',
+                'message': 'Random Access Preamble'
+            }
+            UL_SENDER(payload)
 
-if __name__ == "__main__":
-    UE_Operation()
+    elif message['msg_type'] == 'RAR':
+        print(f"UE: Random Access Response is received through {message['channel']}")
+        sleep(1)
+        payload = {
+            'msg_type': 'RRC Connection Request',
+            'channel': 'CCCH-UL-SCH'
+        }
+        UL_SENDER(payload)
+        
+    elif message['msg_type'] == 'RRC Connection Setup':
+        print(f"UE: gNB has sent over RRC aknowledgement and {message['operation']} operation \
+            performed over {message['channel']} channel")
+        print("*********Initial Access and Registration Procedure Completed***********")
+
+
+# if __name__ == "__main__":
+#     UE_operation()
