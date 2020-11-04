@@ -1,5 +1,6 @@
 from time import sleep
 import UE
+import AMF
 
 def RRC_SENDER():
     payload = {
@@ -76,6 +77,7 @@ def PSS_SSS_sender(): #sending Primary and secondary synchronization signal
     syn_flag = UE.DL_RECEIVER(payload)
     if syn_flag == 1:
         PBCH_SENDER()
+
 def CU(signal):
     if signal['msg_type'] == 'Initial RRC':
         print(f"gNB-CU: Recieved {signal['message']}")
@@ -84,20 +86,90 @@ def CU(signal):
             'msg_type': "DL RRC",
             'message': "DL RRC MESSAGE TRANSFER"
         }
+        sleep(1)
         print("gNB-CU: Sending RRC Setup signal")
-        DU("signal")
+        DU(signal)
+
+    elif signal['msg_type'] == 'RRCSetupComplete':
+        print('******Setting up UE context********')
+        signal = {
+            'msg_type': 'UEContextSetup',
+            'message': "Initial UE MESSAGE"
+        }
+        AMF.Receiver(signal)
+    elif signal['msg_type'] == 'AMFContestResponse':
+        sleep(1)
+        print("Forwarding UE Context Setup Request")
+        DU(signal)
+
+    elif signal['msg_type'] == 'UE CONTEXT SETUP RESPONSE':
+        sleep(1)
+        print(f"gNB-CU: {signal['msg_type']} has been recieved")
+        print(f"gNB-CU: {signal['message']} has been recieved")
+        signal ={
+            'msg_type': "DL RRC Message",
+            'message': "RRCReconfiguration"
+        }
+        print(f"gNB-CU: {signal['msg_type']} sent with {signal['msg_type']} encapsulated")
+        DU(signal)
+    
+    elif signal['msg_type'] == 'UL RRC Message Transfer':
+        sleep(1)
+        print(f"gNB-CU: {signal['msg_type']} has been recieved")
+        signal = {
+            'msg_type': "Initial Context Setup Response"
+        }
+        AMF.Receiver(signal)
 
 def DU(signal):
+
     if signal['msg_type'] ==  'RRCSetupRequest':
         signal = {
-            'msg_type': "Initial RRC"
-            'message': "Initial UL RRC Message Transfer"
+            'msg_type': "Initial RRC",
+            'message': "Initial UL RRC Message Transfer",
             'C-RNTI': "ALLOCATING"
         }
         print(f"gNB-DU: Now sending {signal['message']}")
         CU(signal)
-    elif signal
 
+    elif signal["msg_type"] == "DL RRC":
+        signal ={
+            'msg_type': "RRCSetup"
+        }
+        print(f"gNB-DU: Sending {signal['msg_type']}")
+        UE.DL_RECEIVER(signal)
+
+    elif signal['msg_type'] == "RRCSetupComplete":
+        signal['message'] = "UL RRC Message Transfer"
+        print(f"gNB-DU: Sending {signal['message']}")
+        CU(signal)
+    
+    elif signal['msg_type'] == "AMFContestResponse":
+        signal = {'msg_type': 'SecurityModeCommand',
+                'message': 'UE Context Message'}
+        print(f"{signal['message']} is sent with {signal['msg_type']} encapsulated")
+        UE.DL_RECEIVER(signal)    
+    
+    elif signal['msg_type'] == 'SecureModeComplete':
+        signal = {
+            'msg_type': 'UE CONTEXT SETUP RESPONSE',
+            'message': "UL RRC Message"
+        }
+        print(f"gNB-DU: {signal['msg_type']} is sent to CU")
+        CU(signal)
+    
+    elif signal['msg_type'] ==  "DL RRC Message":
+        print(f"gNB-DU: {signal['msg_type']} has been received")
+        print(f"gNB-DU: {signal['message']} has been sent")
+        UE.DL_RECEIVER(signal)
+    
+    elif signal['msg_type'] == "RRCReconfigurationComplete":
+        print(f"gNB-DU: {signal['msg_type']} has been recieved")
+        signal = {
+            'msg_type': 'UL RRC Message Transfer'
+        }
+        print(f"gNB-CU: {signal['msg_type']} has been sent")
+        CU(signal)
     
 def gNB_SENDER(operation_trigger):
     if operation_trigger['msg_type'] == 'PSS/SSS':

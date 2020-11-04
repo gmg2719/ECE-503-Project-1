@@ -14,9 +14,19 @@ def RACH_SENDER(message):
 def UL_SENDER(message):
     if message['msg_type'] == 'RACH-PRACH':
         RACH_SENDER(message)
+
     elif message['msg_type'] == 'RRC Connection Request':
         RRC_SENDER(message)
+
     elif message['msg_type'] == 'RRCSetupRequest':
+        print(f"UE: Sending {message['msg_type']}")
+        gNB.DU(message)
+    
+    elif message['msg_type'] ==  'SecureModeComplete':
+        print(F"UE: Sending {message['msg_type']}")
+        gNB.DU(message)
+    
+    elif message['msg_type'] == 'RRCReconfigurationComplete':
         print(f"UE: Sending {message['msg_type']}")
         gNB.DU(message)
 
@@ -78,6 +88,30 @@ def DL_RECEIVER(message):
         print("------------------Starting Radio Resource Control Setup----------------")
         signal = {
             'msg_type': "RRCSetupRequest"
+        }
+        UL_SENDER(signal)
+
+    elif message['msg_type'] == "RRCSetup":
+        print(f"UE: Recieved {message['msg_type']}")
+        signal = {
+            'msg_type': "RRCSetupComplete"
+        }
+        sleep(1)
+        print(f"UE: Sending {signal['msg_type']}")
+        gNB.DU(signal)
+
+    elif message['msg_type'] == 'SecurityModeCommand':
+        print(f"UE: {message['msg_type']} recieved")
+        sleep(1)
+        signal = {
+            'msg_type': "SecureModeComplete"
+        }
+        UL_SENDER(signal)
+    
+    elif message['msg_type'] == "DL RRC Message":
+        print(f"UE: {message['message']} has been recieved")
+        signal = {
+            'msg_type': "RRCReconfigurationComplete"
         }
         UL_SENDER(signal)
 
