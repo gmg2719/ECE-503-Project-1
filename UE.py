@@ -16,6 +16,9 @@ def UL_SENDER(message):
         RACH_SENDER(message)
     elif message['msg_type'] == 'RRC Connection Request':
         RRC_SENDER(message)
+    elif message['msg_type'] == 'RRCSetupRequest':
+        print(f"UE: Sending {message['msg_type']}")
+        gNB.DU(message)
 
 def DL_RECEIVER(message):
 
@@ -70,9 +73,13 @@ def DL_RECEIVER(message):
         UL_SENDER(payload)
         
     elif message['msg_type'] == 'RRC Connection Setup':
-        print(f"UE: gNB has sent over RRC aknowledgement and {message['operation']} operation \
-            performed over {message['channel']} channel")
+        print(f"UE: gNB has sent over RRC aknowledgement and {message['operation']} operation performed over {message['channel']} channel")
         print("*********Initial Access and Registration Procedure Completed***********")
+        print("------------------Starting Radio Resource Control Setup----------------")
+        signal = {
+            'msg_type': "RRCSetupRequest"
+        }
+        UL_SENDER(signal)
 
 
 # if __name__ == "__main__":

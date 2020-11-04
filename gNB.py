@@ -76,6 +76,27 @@ def PSS_SSS_sender(): #sending Primary and secondary synchronization signal
     syn_flag = UE.DL_RECEIVER(payload)
     if syn_flag == 1:
         PBCH_SENDER()
+def CU(signal):
+    if signal['msg_type'] == 'Initial RRC':
+        print(f"gNB-CU: Recieved {signal['message']}")
+        print("gNB-CU: UE F1AP ID allocated")
+        signal = {
+            'msg_type': "DL RRC",
+            'message': "DL RRC MESSAGE TRANSFER"
+        }
+        print("gNB-CU: Sending RRC Setup signal")
+        DU("signal")
+
+def DU(signal):
+    if signal['msg_type'] ==  'RRCSetupRequest':
+        signal = {
+            'msg_type': "Initial RRC"
+            'message': "Initial UL RRC Message Transfer"
+            'C-RNTI': "ALLOCATING"
+        }
+        print(f"gNB-DU: Now sending {signal['message']}")
+        CU(signal)
+    elif signal
 
     
 def gNB_SENDER(operation_trigger):
@@ -102,7 +123,7 @@ def gNB_RECEIVER(payload):
         }
         gNB_SENDER(operation_trigger)
     elif payload['msg_type'] == 'RRC Connection Request':
-        print(f"{payload['msg_type']} has been received")
+        print(f"gNB: {payload['msg_type']} has been received")
         operation_trigger = {
             'msg_type': 'RRC'
         }
