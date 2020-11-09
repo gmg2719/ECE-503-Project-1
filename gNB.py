@@ -200,3 +200,16 @@ def gNB_RECEIVER(payload):
             'msg_type': 'RRC'
         }
         gNB_SENDER(operation_trigger)
+
+    elif payload['msg_type'] == 'REGISTRATION REQUEST':
+        print(f"gNB: Recieved {payload['msg_type']}")
+        signal = {
+            'msg_type' : 'REGISTRATION REQUEST',
+         
+            'protocol': "NG-AP"
+        }
+        print(f"gNB: Sending {signal['msg_type']} over {signal['protocol']} protocol")
+        sleep(1)
+        AMF.Receiver(signal)
+        
+

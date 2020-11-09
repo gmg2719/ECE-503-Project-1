@@ -1,5 +1,6 @@
 from time import sleep
 import gNB
+import AMF
 
 def RRC_SENDER(message):
     sleep(1)
@@ -29,6 +30,15 @@ def UL_SENDER(message):
     elif message['msg_type'] == 'RRCReconfigurationComplete':
         print(f"UE: Sending {message['msg_type']}")
         gNB.DU(message)
+    
+    elif message['msg_type'] == 'REGISTRATION REQUEST':
+        signal = {
+            'msg_type' : 'REGISTRATION REQUEST',
+        }
+        print(f"UE: Sending {signal['msg_type']}")
+        sleep(1)
+        gNB.gNB_RECEIVER(signal)
+
 
 def DL_RECEIVER(message):
 
@@ -114,6 +124,16 @@ def DL_RECEIVER(message):
             'msg_type': "RRCReconfigurationComplete"
         }
         UL_SENDER(signal)
+    
+    elif message['msg_type'] == "IDENTITY REQUEST":
+        signal = {
+           'msg_type': "IDENTITY RESPONSE",
+           'ue_id': 9789863989
+        }
+        sleep(1)
+        print(f"UE: Sending {signal['msg_type']} with {signal['ue_id']}")
+        AMF.Receiver(signal)
+        
 
 
 # if __name__ == "__main__":
