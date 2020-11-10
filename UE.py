@@ -133,7 +133,20 @@ def DL_RECEIVER(message):
         sleep(1)
         print(f"UE: Sending {signal['msg_type']} with {signal['ue_id']}")
         AMF.Receiver(signal)
-        
+    
+    elif message['msg_type'] == "SECURITY MODE COMMAND":
+        print(f"UE: Received {message['msg_type']}")
+        signal = {
+            'msg_type': "SECURITY MODE COMPLETED"
+        }
+        print(f"UE: Sending {signal['msg_type']}")
+        AMF.Receiver(signal)
+    
+    elif  message['msg_type'] == "REGISTRATION ACCEPT":
+        print(f"UE: Received {message['msg_type']}")
+        message['msg_type'] = "REGISTRATION COMPLETE"
+        print(f"UE: Sending {message['msg_type']}")
+        AMF.Receiver(message)
 
 
 # if __name__ == "__main__":

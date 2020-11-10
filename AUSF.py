@@ -8,5 +8,10 @@ def Receiver(signal):
         print("AUSF: Querying UDM to provide authentication")
         signal["msg_type"] = "Nudm_UEAuthentication_GetRequest"
         print(f"AUSF: Sending {signal['msg_type']} to UDM")
-        flag = UDM.repo_checker(signal)
+        UDM.repo_checker(signal)
+
+    elif signal['msg_type'] == "5G-AKA":
+        print(f"AUSF: Recieved the {signal['msg_type']} with the key {signal['key_IV']}")
+        print("AUSF: Passing it to AMF")
+        AMF.Receiver(signal)
 
