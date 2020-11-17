@@ -62,12 +62,14 @@ def Receiver(signal):
     
     elif signal['msg_type'] == "REGISTRATION COMPLETE":
         print(f"AMF: Received {signal['msg_type']} ")
-        print("--------------------Finished Initial Registration Procedure--------------")
-
-        
-
-
+        print("--------------------Finished Initial UE Registration Procedure--------------")
+        runner.PDU_trigger()
     
+    
+    elif signal['msg_type'] == "PDU Session Establishment Request":
+        print(f"AMF: Received {signal['msg_type']}")
+        print(f"AMF: Received payload {signal}")
+        print(f"AMF: ")
 
 def Transmitter(signal):
     if signal['msg_type'] == "AMFContestResponse":

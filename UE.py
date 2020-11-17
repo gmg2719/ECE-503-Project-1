@@ -148,6 +148,17 @@ def DL_RECEIVER(message):
         print(f"UE: Sending {message['msg_type']}")
         AMF.Receiver(message)
 
-
-# if __name__ == "__main__":
-#     UE_operation()
+    elif message['msg_type'] == "PDU Session Establishment Request":
+        print(f"UE: Sending {message['msg_type']}")
+        payload = { 
+        'msg_type': "PDU Session Establishment Request",
+        'User Location': 60616,
+        'Access Type Location': "",
+        'PDU Session ID': 85997954,
+        'Request Type': "Initial Request"
+        }
+        sleep(1)
+        AMF.Receiver(payload)
+        
+        
+        

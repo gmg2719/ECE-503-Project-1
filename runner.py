@@ -7,7 +7,14 @@ def Reg_trigger():
     }
     UE.UL_SENDER(operation_trigger)
 
+def PDU_trigger():
+    print("-----------------Starting PDU Session Establishement----------------")
+    payload = {
+        'msg_type': "PDU Session Establishment Request",
+    }
+    UE.DL_RECEIVER(payload)
 
+    
 
 
 
