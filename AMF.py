@@ -3,6 +3,8 @@ import gNB
 import UE
 import AUSF
 import UDM
+import json
+import SMF
 
 def Receiver(signal):
     if signal['msg_type'] == 'UEContextSetup':
@@ -69,7 +71,18 @@ def Receiver(signal):
     elif signal['msg_type'] == "PDU Session Establishment Request":
         print(f"AMF: Received {signal['msg_type']}")
         print(f"AMF: Received payload {signal}")
-        print(f"AMF: ")
+        if signal['Request Type'] == "Initial Request":
+            print("AMF: This is a request for a new PDU session a new PDU session will be created")
+            
+        else:
+            print("AMF: Checking with SMF if this is existing PDU Session")
+            flag = SMF.session_checker(signal)
+            if flag == True:
+                print("AMF: A PDU session already existed that will be used")
+            else:
+                print("AMF: There was no previous PDU Session a New Session will be created")
+
+
 
 def Transmitter(signal):
     if signal['msg_type'] == "AMFContestResponse":
