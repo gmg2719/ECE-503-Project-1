@@ -211,5 +211,11 @@ def gNB_RECEIVER(payload):
         print(f"gNB: Sending {signal['msg_type']} over {signal['protocol']} protocol")
         sleep(1)
         AMF.Receiver(signal)
+
+    elif payload['msg_type'] == "N2 PDU Session Request(NAS msg)":
+        print(f"gNB: Recieved {payload['msg_type']}")
+        print(f"gNB: Forwarding to UE")
+        sleep(1)
+        UE.DL_RECEIVER(payload)
         
 

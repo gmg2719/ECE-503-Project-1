@@ -6,6 +6,7 @@ import UDM
 import json
 import SMF
 
+
 def Receiver(signal):
     if signal['msg_type'] == 'UEContextSetup':
         print(f"AMF: Recieved {signal['message']}")
@@ -73,7 +74,7 @@ def Receiver(signal):
         print(f"AMF: Received payload {signal}")
         if signal['Request Type'] == "Initial Request":
             print("AMF: This is a request for a new PDU session a new PDU session will be created")
-            
+            SMF.session_maker(signal)
         else:
             print("AMF: Checking with SMF if this is existing PDU Session")
             flag = SMF.session_checker(signal)
@@ -81,8 +82,22 @@ def Receiver(signal):
                 print("AMF: A PDU session already existed that will be used")
             else:
                 print("AMF: There was no previous PDU Session a New Session will be created")
+                SMF.session_maker(signal)
 
+    elif signal['msg_type'] == "Namf_Communication_N1N2MessageTransfer":
+        print(f"AMF: Received {signal['msg_type']}")
+        print(f"AMF: Received payload {signal}")
+        signal['msg_type'] = "N2 PDU Session Request(NAS msg)"
+        print(f"AMF: Sending {signal['msg_type']} to RAN")
+        gNB.gNB_RECEIVER(signal)
 
+    elif signal['msg_type'] == "N2 PDU Session ACK":
+        print(f"AMF: Received {signal['msg_type']}")
+        signal = {
+            'msg_type' : "Initiate PDU Session and SM Context"
+        }
+        print(f"AMF: Contacting SMF to Grabbing UPF session for initial data transfer")
+        SMF.transceiver(signal)
 
 def Transmitter(signal):
     if signal['msg_type'] == "AMFContestResponse":

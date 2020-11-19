@@ -1,5 +1,7 @@
 import json 
-
+import PCF
+import UPF
+import AMF
 def session_checker(signal):
     with open('pdu_sessions.json', 'r') as json_file:
         sessions = json.load(json_file)
@@ -13,5 +15,47 @@ def session_checker(signal):
             return False
 
 def session_maker(signal):
-    with open('pdu_sessions.json', 'w') as json_file:
-        
+    with open('pdu_sessions.json', 'r') as json_file:
+        sessions = json.load(json_file)
+        sessions['PDU_SESSIONS'].append(signal['PDU Session ID'])
+        with open('pdu_sessions.json', 'w') as json_file:
+            json.dump(sessions, json_file, indent=4)
+            print("SMF: The new session has been created and authenticated")
+            print("SMF: Retrieving policy info from PCF")
+            signal = {
+                "msg_type": 'SM Policy association establishment'
+            }
+            transceiver(signal)
+
+def transceiver(signal):
+    if signal['msg_type'] == "SM Policy association establishment":
+        print(f"SMF: Sending {signal['msg_type']}")
+        PCF.Tranciever(signal)
+    
+    elif signal['msg_type'] == "Session Establishment Response":
+        print(f"SMF: Recieved {signal['msg_type']}")
+        print("SMF: Selecting UPF")
+        signal = {
+            'msg_type': "N4 Session Establishment/Modification Request"
+        }
+        print(f"SMF: Sending {signal['msg_type']}")
+        UPF.Transceiver(signal)
+
+    elif signal['msg_type'] == "N4 Session Establishment/Modification Response":
+        print(f"SMF: Recieved {signal['msg_type']}")
+        signal = {
+            "msg_type": "Namf_Communication_N1N2MessageTransfer",
+            "PDU Session ID": 85997954,
+            "QFI": 5
+        }
+        print(F"SMF: Sending {signal['msg_type']}")
+        AMF.Receiver(signal)
+    
+    elif signal['msg_type'] == "Initiate PDU Session and SM Context":
+        signal =  {
+            'msg_type': "N4 Session Modification Request"
+        }
+        print(F"SMF: Sending {signal['msg_type']}")
+        UPF.Transceiver(signal)
+
+

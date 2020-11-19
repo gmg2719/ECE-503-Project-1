@@ -159,6 +159,22 @@ def DL_RECEIVER(message):
         }
         sleep(1)
         AMF.Receiver(payload)
-        
+
+    elif message['msg_type'] == "N2 PDU Session Request(NAS msg)":
+        print(f"UE: Recieved {message['msg_type']}")
+        signal = {
+            'msg_type': "N2 PDU Session ACK"
+        }
+        print(f"UE: Sending {signal['msg_type']}")
+        print("UE: Sending First Uplink Message")
+        sleep(1)
+        AMF.Receiver(signal)
+    
+    elif message['msg_type'] == "First Downlink Message":
+        print(f"UE: Recieved {message['msg_type']}")
+        print("UE: PDU Session has been established")
+        print("UE: Updated SM Context with SMF")
+        print("---------------Simulation has been completed----------------")
+
         
         
