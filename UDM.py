@@ -1,7 +1,7 @@
 import json
 import AUSF
 import AMF
-def AKA_procedure():
+def AKA_procedure():#Function to perform the 5G-aka procedure
     print("UDM: Starting 5G AKA exchange procedure")
     print("UDM: Sending the key over to AUSF")
     signal = {
@@ -9,7 +9,7 @@ def AKA_procedure():
         "key_IV": 40572845908230945890
     }
     AUSF.Receiver(signal)
-def Transiever(signal):
+def Transiever(signal): #Function to perform the AMF transmitter
     if signal['msg_type'] == "Nudm_UECM_Registration_Request":
         print(f"UDM: Recieved {signal['msg_type']}")
         signal['msg_type'] = "Nudm_UECM_Registration_Response"
@@ -19,7 +19,7 @@ def Transiever(signal):
     elif signal['msg_type'] == 'Nudm_SDM_GetRequest':
         print(f"UDM: Received {signal['msg_type']} ")
         print(f"UDM: Retrieving subscription data")
-        signal = {
+        signal = { #payload with subscription
             'msg_type': 'Nudm_SDM_GetResponse',
             'subscription': {
                 'plan':'$30/month',

@@ -1,8 +1,9 @@
+#Importing network functions to be interfaceed with
 import AMF
 import UDM
 
 
-def Receiver(signal):
+def Receiver(signal): # acts the receiver of the AUSF communicating with UDM to retrive authentication information and forward to AMF
     if signal["msg_type"] == "Nausf_UEAuthenticationRequest":
         print(f"AUSF: Received {signal['msg_type']}")
         print("AUSF: Querying UDM to provide authentication")

@@ -1,8 +1,9 @@
+# import other network functions and modules required for operation
 import json 
 import PCF
 import UPF
 import AMF
-def session_checker(signal):
+def session_checker(signal): # function to perform to check if a previous session with UE already exists byb checking the sessions database
     with open('pdu_sessions.json', 'r') as json_file:
         sessions = json.load(json_file)
         sess_list = sessions['PDU_SESSIONS']
@@ -14,7 +15,7 @@ def session_checker(signal):
         else:
             return False
 
-def session_maker(signal):
+def session_maker(signal): #function to create a session if this is new session requested by the UE
     with open('pdu_sessions.json', 'r') as json_file:
         sessions = json.load(json_file)
         sessions['PDU_SESSIONS'].append(signal['PDU Session ID'])
@@ -26,8 +27,8 @@ def session_maker(signal):
                 "msg_type": 'SM Policy association establishment'
             }
             transceiver(signal)
-
-def transceiver(signal):
+ 
+def transceiver(signal): #  Function to perform the TRANCEIVER operations of the SMF
     if signal['msg_type'] == "SM Policy association establishment":
         print(f"SMF: Sending {signal['msg_type']}")
         PCF.Tranciever(signal)

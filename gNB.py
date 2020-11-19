@@ -2,7 +2,7 @@ from time import sleep
 import UE
 import AMF
 
-def RRC_SENDER():
+def RRC_SENDER(): # function to send the RRC message to UE
     payload = {
         'msg_type': 'RRC Connection Setup',
         'operation': 'MAC Contention Resolution',
@@ -11,7 +11,7 @@ def RRC_SENDER():
     print("gNB: RRC connection setup message is sent from gNB")
     UE.DL_RECEIVER(payload)
 
-def RAR_SENDER():
+def RAR_SENDER(): # function to send the RAR MESSAGE to the UE
     payload = {
         'msg_type': 'RAR',
         'channel': 'DL-SCH-PDSCH',
@@ -20,8 +20,8 @@ def RAR_SENDER():
     print("gNB: Random Access Response is sent.")
     UE.DL_RECEIVER(payload)
 
-def SIB_SENDER():
-    SIB1 = {
+def SIB_SENDER(): #Function to send the SIB with system information to the UE
+    SIB1 = { #sending the SIB1
         'msg_type': 'BCCH-DL SCH',
         'SIB Type': 1,
         'PLMN': "xyz",
@@ -31,8 +31,8 @@ def SIB_SENDER():
     print('gNB: SIB1 sent at gNB')
     sib1_flag = UE.DL_RECEIVER(SIB1)
     sleep(1)
-    if sib1_flag == True:
-        SIB2 = {
+    if sib1_flag == True: # 
+        SIB2 = { # Sending the SIB2 
         'msg_type': 'BCCH-DL SCH',
         'SIB Type': 2,
         'HARQ': "available",
@@ -44,7 +44,7 @@ def SIB_SENDER():
     
 
 def MIB_SENDER():
-    payload = {
+    payload = { #sending the Master information block 
         'msg_type': 'BCCH-BCH',
         'SIB_DECODER_FLAG' : True,
         'SIB_decoder_key': "adklfjlkajsdfkljlk"
@@ -55,7 +55,7 @@ def MIB_SENDER():
     if SIB1_DECODER == True:
         SIB_SENDER() 
 
-def PBCH_SENDER():
+def PBCH_SENDER(): #function to send the MIB after the PBCH is established
     payload = {
          'msg_type': 'PBCH',
          'sys_info_trigger': 1
@@ -78,7 +78,7 @@ def PSS_SSS_sender(): #sending Primary and secondary synchronization signal
     if syn_flag == 1:
         PBCH_SENDER()
 
-def CU(signal):
+def CU(signal): # function to perform the operation of the gNB Centralised Unit
     if signal['msg_type'] == 'Initial RRC':
         print(f"gNB-CU: Recieved {signal['message']}")
         print("gNB-CU: UE F1AP ID allocated")
@@ -119,9 +119,9 @@ def CU(signal):
         signal = {
             'msg_type': "Initial Context Setup Response"
         }
-        AMF.Receiver(signal)
+        AMF.Receiver(signal) #Sending data to the AMF Receiver
 
-def DU(signal):
+def DU(signal): # Function to perform the operation the Distributed Unit
 
     if signal['msg_type'] ==  'RRCSetupRequest':
         signal = {
@@ -130,7 +130,7 @@ def DU(signal):
             'C-RNTI': "ALLOCATING"
         }
         print(f"gNB-DU: Now sending {signal['message']}")
-        CU(signal)
+        CU(signal) # interface with the Centralised unit
 
     elif signal["msg_type"] == "DL RRC":
         signal ={
@@ -151,7 +151,7 @@ def DU(signal):
         UE.DL_RECEIVER(signal)    
     
     elif signal['msg_type'] == 'SecureModeComplete':
-        signal = {
+        signal = { 
             'msg_type': 'UE CONTEXT SETUP RESPONSE',
             'message': "UL RRC Message"
         }
@@ -171,7 +171,7 @@ def DU(signal):
         print(f"gNB-CU: {signal['msg_type']} has been sent")
         CU(signal)
     
-def gNB_SENDER(operation_trigger):
+def gNB_SENDER(operation_trigger): #Function to act as the gNB transmitter to interface with other network functions
     if operation_trigger['msg_type'] == 'PSS/SSS':
         print("---------------STARTING CONNECTION PROCEDURE-------------------")
         print("*******Starting Initial Access and REgistration Procedure******")
@@ -186,7 +186,7 @@ def gNB_SENDER(operation_trigger):
         sleep(1)
         RRC_SENDER()
 
-def gNB_RECEIVER(payload):
+def gNB_RECEIVER(payload): # Function to act as the gNB receiver accepting message with other network function
     if payload['msg_type'] == 'RACH-PRACH':
         print(f"gNB: {payload['message']} has been recieved from UE")
         sleep(1)
@@ -210,7 +210,7 @@ def gNB_RECEIVER(payload):
         }
         print(f"gNB: Sending {signal['msg_type']} over {signal['protocol']} protocol")
         sleep(1)
-        AMF.Receiver(signal)
+        AMF.Receiver(signal) 
 
     elif payload['msg_type'] == "N2 PDU Session Request(NAS msg)":
         print(f"gNB: Recieved {payload['msg_type']}")

@@ -1,23 +1,23 @@
 from time import sleep
-import gNB
-import AMF
+import gNB #import module to access gNB operation
+import AMF #import module for NAS messaging with AMF
 
-def RRC_SENDER(message):
+def RRC_SENDER(message): #function to send the RRC request message
     sleep(1)
     print(f"UE: {message['msg_type']} is sent over {message['channel']} channel")
     gNB.gNB_RECEIVER(message)
 
-def RACH_SENDER(message):
+def RACH_SENDER(message): # Function to send the Randon access preamble
     sleep(1)
     print('UE: Sending RACH preamble')
     gNB.gNB_RECEIVER(message)
 
-def UL_SENDER(message):
+def UL_SENDER(message): #Function to process the messages received message from the transmitter and send it over to the apporpriate network function
     if message['msg_type'] == 'RACH-PRACH':
         RACH_SENDER(message)
 
     elif message['msg_type'] == 'RRC Connection Request':
-        RRC_SENDER(message)
+        RRC_SENDER(message) 
 
     elif message['msg_type'] == 'RRCSetupRequest':
         print(f"UE: Sending {message['msg_type']}")
@@ -25,7 +25,7 @@ def UL_SENDER(message):
     
     elif message['msg_type'] ==  'SecureModeComplete':
         print(F"UE: Sending {message['msg_type']}")
-        gNB.DU(message)
+        gNB.DU(message) #sending data to gNB Distributed unit
     
     elif message['msg_type'] == 'RRCReconfigurationComplete':
         print(f"UE: Sending {message['msg_type']}")
@@ -37,7 +37,7 @@ def UL_SENDER(message):
         }
         print(f"UE: Sending {signal['msg_type']}")
         sleep(1)
-        gNB.gNB_RECEIVER(signal)
+        gNB.gNB_RECEIVER(signal) # sending data to the gNB receiver
 
 
 def DL_RECEIVER(message):
@@ -63,7 +63,7 @@ def DL_RECEIVER(message):
         return message['SIB_DECODER_FLAG']
     
     elif message['msg_type'] == 'BCCH-DL SCH': # SIB blocks are now recieved and processed
-        if message['SIB Type'] == 1:
+        if message['SIB Type'] == 1: # received SIB1 and print the payload
             print('UE: System Information Block Type 1 has been recieved through BCCH-DL SCH')
             print("--------------System Information Block Type 1-------------")
             print(message)
@@ -71,7 +71,7 @@ def DL_RECEIVER(message):
             sib1_flag = True
             return sib1_flag
             
-        elif message['SIB Type'] == 2:
+        elif message['SIB Type'] == 2: # received SIB2 and print the payload
             print('UE: System Information Block Type 1 has been recieved through BCCH-DL SCH')
             print("--------------System Information Block Type 2-------------")
             print(message)
@@ -86,11 +86,11 @@ def DL_RECEIVER(message):
     elif message['msg_type'] == 'RAR':
         print(f"UE: Random Access Response is received through {message['channel']}")
         sleep(1)
-        payload = {
+        payload = { # payload and signals are used to send the appropriate message to the next network function with appropriate data
             'msg_type': 'RRC Connection Request',
             'channel': 'CCCH-UL-SCH'
         }
-        UL_SENDER(payload)
+        UL_SENDER(payload) # sending to UE uplink sender for transmission to the next network function
         
     elif message['msg_type'] == 'RRC Connection Setup':
         print(f"UE: gNB has sent over RRC aknowledgement and {message['operation']} operation performed over {message['channel']} channel")
@@ -99,7 +99,7 @@ def DL_RECEIVER(message):
         signal = {
             'msg_type': "RRCSetupRequest"
         }
-        UL_SENDER(signal)
+        UL_SENDER(signal) 
 
     elif message['msg_type'] == "RRCSetup":
         print(f"UE: Recieved {message['msg_type']}")
@@ -150,7 +150,7 @@ def DL_RECEIVER(message):
 
     elif message['msg_type'] == "PDU Session Establishment Request":
         print(f"UE: Sending {message['msg_type']}")
-        payload = { 
+        payload = { # PDU Session request payload sent by UE with the required inforamtion
         'msg_type': "PDU Session Establishment Request",
         'User Location': 60616,
         'Access Type Location': "",

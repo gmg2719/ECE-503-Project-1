@@ -1,5 +1,6 @@
+#importing other network functions to interface with
 import runner
-import gNB
+import gNB 
 import UE
 import AUSF
 import UDM
@@ -7,7 +8,7 @@ import json
 import SMF
 
 
-def Receiver(signal):
+def Receiver(signal): #Function to perform the operation of the AMF receiver
     if signal['msg_type'] == 'UEContextSetup':
         print(f"AMF: Recieved {signal['message']}")
         signal['msg_type']  = "AMFContestResponse"
@@ -99,7 +100,7 @@ def Receiver(signal):
         print(f"AMF: Contacting SMF to Grabbing UPF session for initial data transfer")
         SMF.transceiver(signal)
 
-def Transmitter(signal):
+def Transmitter(signal): #Function to act as the AMF Transmitter to interface with other network functions
     if signal['msg_type'] == "AMFContestResponse":
         gNB.CU(signal)
 
